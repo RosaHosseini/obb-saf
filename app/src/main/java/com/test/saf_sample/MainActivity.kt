@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     private val handleInstallIntentActivityResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        openDocumentTree()
+        generateObbFile()
     }
 
     private val handleIOIntentActivityResult = registerForActivityResult(
@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
-            openDocumentTree()
+            generateObbFile()
         }
     }
 
@@ -58,16 +58,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         findViewById<TextView>(R.id.test_txt).setOnClickListener {
-            openDocumentTree()
+            generateObbFile()
         }
     }
 
     /** Get needed permission if not granted and then create a test doc in obb dir */
-    private fun openDocumentTree() {
+    private fun generateObbFile() {
         when {
             !isInstallPermissionGranted() -> askInstallPermission()
             !areIOPermissionsGranted() -> askIOPermission()
-            else -> makeDoc(PACKAGE_NAME)
+            else -> makeDoc(OBB_DOC_ID, PACKAGE_NAME)
         }
     }
 
@@ -82,8 +82,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Create or write test.txt in Android/data/obb/packageName  **/
-    private fun makeDoc(packageName: String) {
-        val dir: DocumentFile? = getDir(OBB_DOC_ID, packageName)
+    private fun makeDoc(parentDocId: String, packageName: String) {
+        val dir: DocumentFile? = getDir(parentDocId, packageName)
         if (dir == null || dir.exists().not()) {
             //the folder was probably deleted
             //ask user to choose another folder

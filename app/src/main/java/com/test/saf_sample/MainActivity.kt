@@ -25,13 +25,13 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val EXTERNAL_STORAGE_PROVIDER_AUTHORITY =
             "com.android.externalstorage.documents"
-        private const val ANDROID_DOC_ID = "primary:Android"
-        private const val PACKAGE_NAME = "com.farsitel.bazaar.dev"
+        private const val OBB_DOC_ID = "primary:Android/obb"
+        private const val PACKAGE_NAME = "dev"
     }
 
-    private val mAndroidUri: Uri = DocumentsContract.buildTreeDocumentUri(
+    private val mObbUri: Uri = DocumentsContract.buildTreeDocumentUri(
         EXTERNAL_STORAGE_PROVIDER_AUTHORITY,
-        ANDROID_DOC_ID
+        OBB_DOC_ID
     )
 
     private val handleInstallIntentActivityResult = registerForActivityResult(
@@ -66,17 +66,15 @@ class MainActivity : AppCompatActivity() {
     private fun openDocumentTree() {
         when {
             !isInstallPermissionGranted() -> askInstallPermission()
-            areIOPermissionsGranted() -> {
-                makeDoc(PACKAGE_NAME)
-            }
-            else -> askIOPermission()
+            !areIOPermissionsGranted() -> askIOPermission()
+            else -> makeDoc(PACKAGE_NAME)
         }
     }
 
     /** Return  directory  parentDocId/packageName and create it if it does not exist */
     private fun getDir(parentDocId: String, packageName: String): DocumentFile? {
         val parentUri: Uri = DocumentsContract.buildDocumentUriUsingTree(
-            mAndroidUri,
+            mObbUri,
             parentDocId
         )
         val parentDoc: DocumentFile? = DocumentFile.fromTreeUri(this, parentUri)
@@ -85,8 +83,7 @@ class MainActivity : AppCompatActivity() {
 
     /** Create or write test.txt in Android/data/obb/packageName  **/
     private fun makeDoc(packageName: String) {
-        val androidObbDocID = "$ANDROID_DOC_ID/obb"
-        val dir: DocumentFile? = getDir(androidObbDocID, packageName)
+        val dir: DocumentFile? = getDir(OBB_DOC_ID, packageName)
         if (dir == null || dir.exists().not()) {
             //the folder was probably deleted
             //ask user to choose another folder
@@ -121,7 +118,7 @@ class MainActivity : AppCompatActivity() {
     private fun askIOPermission() {
         val uri = DocumentsContract.buildDocumentUri(
             EXTERNAL_STORAGE_PROVIDER_AUTHORITY,
-            ANDROID_DOC_ID
+            OBB_DOC_ID
         )
         val intent = getPrimaryVolume().createOpenDocumentTreeIntent()
         intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri)
@@ -147,7 +144,7 @@ class MainActivity : AppCompatActivity() {
     private fun areIOPermissionsGranted(): Boolean {
         val treeUri: Uri = DocumentsContract.buildTreeDocumentUri(
             EXTERNAL_STORAGE_PROVIDER_AUTHORITY,
-            ANDROID_DOC_ID
+            OBB_DOC_ID
         )
         val uriPermission: UriPermission? = contentResolver.persistedUriPermissions.find {
             it.uri == treeUri && (it.isWritePermission or it.isReadPermission)

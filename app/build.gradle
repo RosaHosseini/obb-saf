@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.axanor.saf_sample"
+        applicationId "com.test.saf_sample"
         minSdkVersion 29
         targetSdkVersion 31
         versionCode 1

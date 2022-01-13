@@ -29,11 +29,6 @@ class MainActivity : AppCompatActivity() {
         private const val PACKAGE_NAME = "dev"
     }
 
-    private val mObbUri: Uri = DocumentsContract.buildTreeDocumentUri(
-        EXTERNAL_STORAGE_PROVIDER_AUTHORITY,
-        OBB_DOC_ID
-    )
-
     private val handleInstallIntentActivityResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -72,18 +67,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Return  directory  parentDocId/packageName and create it if it does not exist */
-    private fun getDir(parentDocId: String, packageName: String): DocumentFile? {
-        val parentUri: Uri = DocumentsContract.buildDocumentUriUsingTree(
-            mObbUri,
-            parentDocId
-        )
+    private fun getDir(parentUri: Uri, packageName: String): DocumentFile? {
         val parentDoc: DocumentFile? = DocumentFile.fromTreeUri(this, parentUri)
         return parentDoc?.findFile(packageName) ?: parentDoc?.createDirectory(packageName)
     }
 
-    /** Create or write test.txt in Android/data/obb/packageName  **/
+    /** Create or write test.txt in parentDocId/packageName  **/
     private fun makeDoc(parentDocId: String, packageName: String) {
-        val dir: DocumentFile? = getDir(parentDocId, packageName)
+        val mObbUri: Uri = DocumentsContract.buildTreeDocumentUri(
+            EXTERNAL_STORAGE_PROVIDER_AUTHORITY,
+            parentDocId
+        )
+        val dir: DocumentFile? = getDir(mObbUri, packageName)
         if (dir == null || dir.exists().not()) {
             //the folder was probably deleted
             //ask user to choose another folder
